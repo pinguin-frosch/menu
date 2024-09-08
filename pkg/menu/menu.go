@@ -5,15 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
 
 type Menu struct {
-	Prompt  string
-	Options map[string]Option
-	active  bool
-	Scanner *bufio.Scanner
+	Prompt       string
+	Options      map[string]Option
+	active       bool
+	Scanner      *bufio.Scanner
+	optionsOrder []string
 }
 
 type Option struct {
@@ -29,12 +31,22 @@ func (m *Menu) AddOption(key, description string, function func()) error {
 	option.Description = description
 	option.Function = function
 	m.Options[key] = option
+	m.orderOptions()
 	return nil
 }
 
+func (m *Menu) orderOptions() {
+	keys := make([]string, 0)
+	for key := range m.Options {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+	m.optionsOrder = keys
+}
+
 func (m *Menu) ShowOptions() {
-	for key, option := range m.Options {
-		fmt.Printf("%s: %s\n", key, option.Description)
+	for _, key := range m.optionsOrder {
+		fmt.Printf("%s: %s\n", key, m.Options[key].Description)
 	}
 }
 
@@ -59,6 +71,7 @@ func NewMenu(prompt string) *Menu {
 	m := Menu{}
 	m.Prompt = prompt
 	m.Options = make(map[string]Option)
+	m.optionsOrder = make([]string, 0)
 	m.AddOption("?", "show options", func() {
 		m.ShowOptions()
 	})
