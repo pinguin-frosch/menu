@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -66,4 +67,28 @@ func NewMenu(prompt string) *Menu {
 	})
 	m.Scanner = bufio.NewScanner(os.Stdin)
 	return &m
+}
+
+func (m *Menu) GetString(prompt string) string {
+	fmt.Print(prompt)
+	m.Scanner.Scan()
+	return strings.Trim(m.Scanner.Text(), " ")
+}
+
+func (m *Menu) GetInt(prompt string) (int, error) {
+	str := m.GetString(prompt)
+	int, err := strconv.Atoi(str)
+	if err != nil {
+		return 0, err
+	}
+	return int, nil
+}
+
+func (m *Menu) GetFloat(prompt string) (float64, error) {
+	str := m.GetString(prompt)
+	float, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		return 0, err
+	}
+	return float, nil
 }
